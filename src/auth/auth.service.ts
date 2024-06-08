@@ -1,26 +1,34 @@
-import { Injectable } from '@nestjs/common';
-import { CreateAuthDto } from './dto/create-auth.dto';
-import { UpdateAuthDto } from './dto/update-auth.dto';
+import { Injectable, UnauthorizedException } from '@nestjs/common'
+import { JwtService } from '@nestjs/jwt'
+import * as argon2 from 'argon2'
+import { IUser } from 'src/types/types'
+import { UserService } from '../user/user.service'
 
 @Injectable()
 export class AuthService {
-  create(createAuthDto: CreateAuthDto) {
-    return 'This action adds a new auth';
+  constructor(
+    private readonly usersService: UserService,
+    private readonly jwtService: JwtService,
+  ) {}
+
+  async login(user: IUser) {
+    const { id, email } = user
+
+    return {
+      id,
+      email,
+      token: this.jwtService.sign({ id: user.id, email: user.email }),
+    }
   }
 
-  findAll() {
-    return `This action returns all auth`;
-  }
+  async validateUser(email: string, password: string) {
+    const user = await this.usersService.findOne(email)
 
-  findOne(id: number) {
-    return `This action returns a #${id} auth`;
-  }
+    const passwordIsMatch = await argon2.verify(user.password, password)
 
-  update(id: number, updateAuthDto: UpdateAuthDto) {
-    return `This action updates a #${id} auth`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} auth`;
+    if (user && passwordIsMatch) {
+      return user
+    }
+    throw new UnauthorizedException('Пароль не подошел')
   }
 }
