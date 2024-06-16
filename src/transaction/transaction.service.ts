@@ -1,26 +1,49 @@
-import { Injectable } from '@nestjs/common';
-import { CreateTransactionDto } from './dto/create-transaction.dto';
-import { UpdateTransactionDto } from './dto/update-transaction.dto';
+import { BadRequestException, Injectable } from '@nestjs/common'
+import { InjectRepository } from '@nestjs/typeorm'
+import { DeepPartial, Repository, getConnection } from 'typeorm'
+import { CreateTransactionDto } from './dto/create-transaction.dto'
+import { Transaction } from './entities/transaction.entity'
 
 @Injectable()
-export class TransactionService {
-  create(createTransactionDto: CreateTransactionDto) {
-    return 'This action adds a new transaction';
-  }
+export class TransactionsService {
+	constructor(
+		@InjectRepository(Transaction)
+		private readonly transactionsRepository: Repository<Transaction>,
+	) {}
 
-  findAll() {
-    return `This action returns all transaction`;
-  }
+	async findAll(): Promise<Transaction[]> {
+		return this.transactionsRepository.find()
+	}
 
-  findOne(id: number) {
-    return `This action returns a #${id} transaction`;
-  }
+	async create(
+		createTransactionDto: CreateTransactionDto,
+		id: number,
+	): Promise<Transaction> {
+		// Создание нового объекта транзакции с корректными типами
+		const newTransaction: DeepPartial<Transaction> = {
+			title: createTransactionDto.title,
+			amount: createTransactionDto.amount.toString(), // Преобразование amount в строку
+			type: createTransactionDto.type,
+			category: createTransactionDto.category,
+			user: { id },
+		}
 
-  update(id: number, updateTransactionDto: UpdateTransactionDto) {
-    return `This action updates a #${id} transaction`;
-  }
+		if (!newTransaction) {
+			throw new BadRequestException('Что-то произошло не так')
+		}
 
-  remove(id: number) {
-    return `This action removes a #${id} transaction`;
-  }
+		return await this.transactionsRepository.save(newTransaction)
+	}
+
+	async update(id: number, transaction: Transaction): Promise<void> {
+		await getConnection().transaction(async (transactionManager) => {
+			await transactionManager.update(Transaction, id, transaction)
+		})
+	}
+
+	async delete(id: number): Promise<void> {
+		await getConnection().transaction(async (transactionManager) => {
+			await transactionManager.delete(Transaction, id)
+		})
+	}
 }

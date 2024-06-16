@@ -8,34 +8,30 @@ import { User } from './entities/user.entity'
 
 @Injectable()
 export class UserService {
-  constructor(
-    @InjectRepository(User) private readonly userRepository: Repository<User>,
-    private readonly jwtService: JwtService,
-  ) {}
+	constructor(
+		@InjectRepository(User) private readonly userRepository: Repository<User>,
+		private readonly jwtService: JwtService,
+	) {}
 
-  async create(createUserDto: CreateUserDto) {
-    const existUser = await this.userRepository.findOne({
-      where: {
-        email: createUserDto.email,
-      },
-    })
-    if (existUser) throw new BadRequestException('User already exist')
+	async create(createUserDto: CreateUserDto) {
+		const existUser = await this.userRepository.findOne({
+			where: {
+				email: createUserDto.email,
+			},
+		})
+		if (existUser) throw new BadRequestException('Такой пользователь уже есть')
 
-    const user = await this.userRepository.save({
-      email: createUserDto.email,
-      password: await argon2.hash(createUserDto.password),
-    })
+		const user = await this.userRepository.save({
+			email: createUserDto.email,
+			password: await argon2.hash(createUserDto.password),
+		})
 
-    const token = this.jwtService.sign({ email: createUserDto.email })
+		const token = this.jwtService.sign({ email: createUserDto.email })
 
-    return { user, token }
-  }
+		return { user, token }
+	}
 
-  async findOne(email: string) {
-    return await this.userRepository.findOne({ where: { email: email } })
-  }
-
-  // findOne(id: number) {
-  //   return `This action returns a #${id} user`;
-  // }
+	async findOne(email: string) {
+		return await this.userRepository.findOne({ where: { email: email } })
+	}
 }

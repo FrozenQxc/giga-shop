@@ -7,19 +7,19 @@ import { UserController } from './user.controller'
 import { UserService } from './user.service'
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([User]),
-    JwtModule.registerAsync({
-      imports: [ConfigModule],
-      useFactory: (configService: ConfigService) => ({
-        secret: configService.get<string>('JWT_SECRET'),
-        signOptions: { expiresIn: '30d' },
-      }),
-      inject: [ConfigService],
-    }),
-  ],
-  controllers: [UserController],
-  providers: [UserService],
-  exports: [UserService],
+	imports: [
+		TypeOrmModule.forFeature([User]),
+		JwtModule.registerAsync({
+			imports: [ConfigModule],
+			useFactory: (configService: ConfigService) => ({
+				secret: configService.get<string>('JWT_SECRET'),
+				signOptions: { expiresIn: '30d' },
+			}),
+			inject: [ConfigService],
+		}),
+	],
+	controllers: [UserController],
+	providers: [UserService],
+	exports: [UserService],
 })
 export class UserModule {}
