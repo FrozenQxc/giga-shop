@@ -1,34 +1,39 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
-import { BalanceService } from './balance.service';
-import { CreateBalanceDto } from './dto/create-balance.dto';
-import { UpdateBalanceDto } from './dto/update-balance.dto';
+import { Body, Controller, Get, Param, Post } from '@nestjs/common'
+import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger'
+import { BalanceService } from './balance.service'
+import { UpdateBalanceDto } from './dto/update-balance.dto'
+import { Balance } from './entities/balance.entity'
 
+@ApiTags('balance')
 @Controller('balance')
 export class BalanceController {
-  constructor(private readonly balanceService: BalanceService) {}
+	constructor(private readonly balanceService: BalanceService) {}
 
-  @Post()
-  create(@Body() createBalanceDto: CreateBalanceDto) {
-    return this.balanceService.create(createBalanceDto);
-  }
+	@Get(':userId')
+	@ApiOperation({ summary: 'Получить баланс пользователя' })
+	@ApiResponse({
+		status: 200,
+		description: 'Баланс успешно получен',
+		type: Balance,
+	})
+	@ApiResponse({ status: 404, description: 'Баланс не найден' })
+	getBalance(@Param('userId') userId: number): Promise<Balance> {
+		return this.balanceService.getBalance(userId)
+	}
 
-  @Get()
-  findAll() {
-    return this.balanceService.findAll();
-  }
-
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.balanceService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateBalanceDto: UpdateBalanceDto) {
-    return this.balanceService.update(+id, updateBalanceDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.balanceService.remove(+id);
-  }
+	@Post('update/:userId')
+	@ApiOperation({ summary: 'Пополнить баланс пользователя' })
+	@ApiBody({ type: UpdateBalanceDto })
+	@ApiResponse({
+		status: 200,
+		description: 'Баланс успешно обновлен',
+		type: Balance,
+	})
+	@ApiResponse({ status: 404, description: 'Баланс не найден' })
+	updateBalance(
+		@Param('userId') userId: number,
+		@Body() updateBalanceDto: UpdateBalanceDto,
+	): Promise<Balance> {
+		return this.balanceService.updateBalance(userId, updateBalanceDto.amount)
+	}
 }

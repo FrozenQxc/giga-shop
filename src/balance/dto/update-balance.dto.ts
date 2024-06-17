@@ -1,4 +1,8 @@
-import { PartialType } from '@nestjs/swagger';
-import { CreateBalanceDto } from './create-balance.dto';
+import { ApiProperty } from '@nestjs/swagger'
+import { IsNumber } from 'class-validator'
 
-export class UpdateBalanceDto extends PartialType(CreateBalanceDto) {}
+export class UpdateBalanceDto {
+	@ApiProperty({ example: 100, description: 'Сумма для пополнения баланса' })
+	@IsNumber()
+	amount: number
+}

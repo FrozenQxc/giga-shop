@@ -5,6 +5,7 @@ import {
 	CreateDateColumn,
 	Entity,
 	OneToMany,
+	OneToOne,
 	PrimaryGeneratedColumn,
 	UpdateDateColumn,
 } from 'typeorm'
@@ -39,3 +40,6 @@ export class User {
 	@UpdateDateColumn()
 	updatedAt: Date
 }
+
+
+

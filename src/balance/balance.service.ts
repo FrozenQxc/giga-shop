@@ -1,26 +1,35 @@
-import { Injectable } from '@nestjs/common';
-import { CreateBalanceDto } from './dto/create-balance.dto';
-import { UpdateBalanceDto } from './dto/update-balance.dto';
+import { Injectable, NotFoundException } from '@nestjs/common'
+import { InjectRepository } from '@nestjs/typeorm'
+import { User } from 'src/user/entities/user.entity'
+import { Repository } from 'typeorm'
+import { Balance } from './entities/balance.entity'
 
 @Injectable()
 export class BalanceService {
-  create(createBalanceDto: CreateBalanceDto) {
-    return 'This action adds a new balance';
-  }
+	constructor(
+		@InjectRepository(Balance)
+		private readonly balanceRepository: Repository<Balance>,
+		@InjectRepository(User)
+		private readonly userRepository: Repository<User>,
+	) {}
 
-  findAll() {
-    return `This action returns all balance`;
-  }
+	async getBalance(userId: number): Promise<Balance> {
+		const balance = await this.balanceRepository.findOne({
+			where: { user: { id: userId } },
+		})
+		if (!balance) {
+			throw new NotFoundException('Баланс не найден')
+		}
+		return balance
+	}
 
-  findOne(id: number) {
-    return `This action returns a #${id} balance`;
-  }
+	async updateBalance(userId: number, amount: number): Promise<Balance> {
+		const balance = await this.getBalance(userId)
+		if (!balance) {
+			throw new NotFoundException('Баланс не найден')
+		}
 
-  update(id: number, updateBalanceDto: UpdateBalanceDto) {
-    return `This action updates a #${id} balance`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} balance`;
-  }
+		balance.amount = Number(balance.amount) + amount
+		return this.balanceRepository.save(balance)
+	}
 }
