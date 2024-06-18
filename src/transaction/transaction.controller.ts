@@ -37,8 +37,8 @@ export class TransactionsController {
 		description: 'Список транзакций',
 		type: [Transaction],
 	})
-	async findAll(): Promise<Transaction[]> {
-		return this.transactionsService.findAll()
+	async findAll(@Req() req): Promise<Transaction[]> {
+		return this.transactionsService.findAllByUser(req.user.id)
 	}
 
 	@Post()

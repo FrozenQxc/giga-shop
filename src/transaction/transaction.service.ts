@@ -15,17 +15,20 @@ export class TransactionsService {
 		return this.transactionsRepository.find()
 	}
 
+	async findAllByUser(userId: number): Promise<Transaction[]> {
+		return this.transactionsRepository.find({ where: { user: { id: userId } } })
+	}
+
 	async create(
 		createTransactionDto: CreateTransactionDto,
-		id: number,
+		userId: number,
 	): Promise<Transaction> {
-		// Создание нового объекта транзакции с корректными типами
 		const newTransaction: DeepPartial<Transaction> = {
 			title: createTransactionDto.title,
-			amount: createTransactionDto.amount.toString(), // Преобразование amount в строку
+			amount: createTransactionDto.amount.toString(),
 			type: createTransactionDto.type,
 			category: createTransactionDto.category,
-			user: { id },
+			user: { id: userId },
 		}
 
 		if (!newTransaction) {
