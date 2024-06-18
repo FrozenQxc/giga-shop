@@ -1,5 +1,3 @@
-import { Balance } from 'src/balance/entities/balance.entity'
-import { Category } from 'src/category/entities/category.entity'
 import {
 	Column,
 	CreateDateColumn,
@@ -9,6 +7,8 @@ import {
 	PrimaryGeneratedColumn,
 	UpdateDateColumn,
 } from 'typeorm'
+import { Balance } from '../../balance/entities/balance.entity'
+import { Category } from '../../category/entities/category.entity'
 import { Transaction } from '../../transaction/entities/transaction.entity'
 
 @Entity()

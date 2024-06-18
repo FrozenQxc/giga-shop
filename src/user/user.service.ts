@@ -2,8 +2,8 @@ import { BadRequestException, Injectable } from '@nestjs/common'
 import { JwtService } from '@nestjs/jwt'
 import { InjectRepository } from '@nestjs/typeorm'
 import * as argon2 from 'argon2'
-import { Balance } from 'src/balance/entities/balance.entity' // Импортируем сущность Balance
 import { Repository } from 'typeorm'
+import { Balance } from '../balance/entities/balance.entity'
 import { CreateUserDto } from './dto/create-user.dto'
 import { User } from './entities/user.entity'
 
