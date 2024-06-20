@@ -14,7 +14,7 @@ import { UserService } from './user.service'
 export class UserController {
 	constructor(private readonly userService: UserService) {}
 
-	@Post()
+	@Post('/create')
 	@UsePipes(new ValidationPipe())
 	@ApiOperation({ summary: 'Создать нового пользователя' })
 	@ApiBody({ type: CreateUserDto })

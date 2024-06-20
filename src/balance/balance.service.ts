@@ -14,13 +14,16 @@ export class BalanceService {
 	) {}
 
 	async getBalance(userId: number): Promise<Balance> {
-		const balance = await this.balanceRepository.findOne({
-			where: { user: { id: userId } },
-		})
-		if (!balance) {
+		const balance = await this.balanceRepository.query(
+			`SELECT * FROM balance WHERE "userId" = $1`,
+			[userId],
+		)
+
+		if (balance.length === 0) {
 			throw new NotFoundException('Баланс не найден')
 		}
-		return balance
+
+		return balance[0]
 	}
 
 	async updateBalance(userId: number, amount: number): Promise<Balance> {
@@ -29,7 +32,14 @@ export class BalanceService {
 			throw new NotFoundException('Баланс не найден')
 		}
 
-		balance.amount = Number(balance.amount) + amount
-		return this.balanceRepository.save(balance)
+		const newAmount = Number(balance.amount) + amount
+
+		await this.balanceRepository.query(
+			`UPDATE balance SET amount = $1 WHERE "userId" = $2`,
+			[newAmount, userId],
+		)
+
+		balance.amount = newAmount
+		return balance
 	}
 }
